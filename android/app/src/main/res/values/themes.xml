@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Framework-тема без AndroidX. Верхняя плашка (ActionBar) уменьшена до 40dp
+         и по умолчанию скрывается в коде (pinch/меню). -->
+    <style name="Theme.Tablo" parent="@android:style/Theme.Material">
+        <item name="android:windowBackground">#101010</item>
+        <item name="android:colorPrimary">#1b1b1b</item>
+        <item name="android:colorPrimaryDark">#000000</item>
+        <item name="android:colorAccent">#4caf50</item>
+        <item name="android:actionBarSize">40dp</item>
+        <item name="android:actionBarStyle">@style/Tablo.ActionBar</item>
+    </style>
+
+    <style name="Tablo.ActionBar" parent="@android:style/Widget.Material.ActionBar.Solid">
+        <item name="android:height">40dp</item>
+        <item name="android:background">#101010</item>
+        <item name="android:titleTextStyle">@style/Tablo.ActionBarTitle</item>
+    </style>
+
+    <style name="Tablo.ActionBarTitle" parent="@android:style/TextAppearance.Material.Widget.ActionBar.Title">
+        <item name="android:textSize">14sp</item>
+    </style>
+</resources>

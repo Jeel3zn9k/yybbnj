@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Иконка-вектор: тёмное табло, красные цифры счёта, зелёная строка состояния. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path android:fillColor="#000000" android:pathData="M0,0h48v48H0z" />
+    <path android:fillColor="#1b1b1b" android:pathData="M3,5h42v32H3z" />
+    <path android:fillColor="#e53935" android:pathData="M7,10h8v22H7zM17,10h8v22h-8z" />
+    <path android:fillColor="#eeeeee" android:pathData="M27,14h4v4h-4zM27,24h4v4h-4z" />
+    <path android:fillColor="#e53935" android:pathData="M33,10h8v22h-8z" />
+    <path android:fillColor="#4caf50" android:pathData="M3,40h42v4H3z" />
+</vector>

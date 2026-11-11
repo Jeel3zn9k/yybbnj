@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>Tablo</title>
+<style>
+html,body{margin:0;background:#000;color:#fff;font-family:Consolas,'Courier New',monospace;font-weight:bold;overflow:hidden;}
+#stage{position:absolute;left:50%;top:50%;width:240px;height:160px;margin-left:-120px;margin-top:-80px;-webkit-transform-origin:50% 50%;transform-origin:50% 50%;}
+.a{position:absolute;text-align:center;white-space:pre;}
+#nh{left:8px;top:8px;width:112px;height:36px;font-size:18px;line-height:18px;}
+#na{left:120px;top:8px;width:112px;height:36px;font-size:18px;line-height:18px;}
+#sh{left:8px;top:52px;width:48px;height:32px;font-size:32px;line-height:32px;}
+#sa{left:184px;top:52px;width:48px;height:32px;font-size:32px;line-height:32px;}
+#time{left:68px;top:52px;width:104px;height:32px;font-size:32px;line-height:32px;}
+#time.two{height:16px;font-size:16px;line-height:16px;}
+#time2{left:68px;top:68px;width:104px;height:16px;font-size:16px;line-height:16px;}
+#period{left:108px;top:96px;width:24px;height:24px;font-size:24px;line-height:24px;}
+#ph{left:8px;top:112px;width:87px;height:32px;font-size:16px;line-height:16px;text-align:left;}
+#pa{left:145px;top:112px;width:87px;height:32px;font-size:16px;line-height:16px;text-align:left;}
+#dots{left:68px;top:124px;width:104px;height:16px;font-size:14px;line-height:16px;}
+#splash{position:absolute;left:0;top:0;width:240px;height:160px;display:none;}
+#clock{left:5px;top:10px;width:230px;height:40px;font-size:40px;line-height:40px;}
+#sdate{left:5px;top:60px;width:230px;height:16px;font-size:16px;line-height:16px;text-align:center;}
+</style>
+</head>
+<body>
+<div id='stage'>
+<div id='sb'>
+<div class='a' id='nh'></div>
+<div class='a' id='na'></div>
+<div class='a' id='sh'>0</div>
+<div class='a' id='time'>--:--</div>
+<div class='a' id='time2'></div>
+<div class='a' id='sa'>0</div>
+<div class='a' id='period'>1</div>
+<div class='a' id='ph'></div>
+<div class='a' id='pa'></div>
+<div class='a' id='dots'></div>
+</div>
+<div id='splash'><div class='a' id='clock'>--:--:--</div><div class='a' id='sdate'></div></div>
+</div>
+<script>
+function pens(s){var out='';var arr=(''+(s||'')).split('; ');for(var i=0;i<arr.length&&i<2;i++){if(arr[i])out+=arr[i]+'\n';}return out;}
+function dots(n){var s='';for(var i=0;i<(n||0);i++)s+='\u25CF ';return s;}
+function fit(){var s=Math.min(window.innerWidth/240,window.innerHeight/160);
+var st=document.getElementById('stage');var tr='scale('+s+')';
+st.style.transform=tr;if('webkitTransform' in st.style){st.style.webkitTransform=tr;}}
+window.onresize=fit;window.onorientationchange=function(){setTimeout(fit,200);};fit();
+var MO=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+var WD=['ВС','ПН','ВТ','СР','ЧТ','ПТ','СБ'];
+function dstr(){var d=new Date();return ('0'+d.getDate()).slice(-2)+' '+MO[d.getMonth()]+' /'+WD[d.getDay()]+'/';}
+function tick(){var x=new XMLHttpRequest();x.open('GET','/pub.json?ts='+new Date().getTime(),true);
+x.onload=function(){setTimeout(tick,500);
+if(x.status!=200){return;}
+var s=null;try{s=JSON.parse(x.responseText);}catch(e){s=null;}
+if(!s){return;}
+var splash=(s.mode=='CLK'||s.mode=='PRE');
+document.getElementById('sb').style.display=splash?'none':'block';
+document.getElementById('splash').style.display=splash?'block':'none';
+if(splash){
+document.getElementById('clock').textContent=s.value||'--:--:--';
+document.getElementById('sdate').textContent=dstr();
+}else{
+document.getElementById('nh').textContent=(s.name_h||'')+'\n'+(s.town_h||'');
+document.getElementById('na').textContent=(s.name_a||'')+'\n'+(s.town_a||'');
+document.getElementById('sh').textContent=(s.score_h!=null?s.score_h:0);
+document.getElementById('sa').textContent=(s.score_a!=null?s.score_a:0);
+var tEl=document.getElementById('time');
+if(s.value2){tEl.className='a two';}else{tEl.className='a';}
+tEl.textContent=s.value||'--:--';
+document.getElementById('time2').textContent=s.value2||'';
+document.getElementById('period').textContent=(s.period!=null?s.period:1);
+document.getElementById('dots').textContent=dots(s.to_h)+'  '+dots(s.to_a);
+document.getElementById('ph').textContent=pens(s.pen_h);
+document.getElementById('pa').textContent=pens(s.pen_a);}
+};
+x.onerror=function(){setTimeout(tick,2000);};
+x.send();}
+tick();
+</script>
+</body>
+</html>

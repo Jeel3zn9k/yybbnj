@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Табло — пульт</string>
+    <string name="app_author">InJeector</string>
+    <string name="app_version">1.2</string>
+    <string name="about_text_fmt">Автор: %1$s\nВерсия: %2$s\n\nМинимальная версия Android: 8.0 (API 26).\n\nПриложение открывает веб-панель программы «Табло» (порт 8642). Вся логика матча — на компьютере табло.</string>
+
+    <string name="menu_open">Меню</string>
+    <string name="menu_server">Адрес сервера…</string>
+    <string name="menu_view">Вид управления</string>
+    <string name="menu_size">Размер интерфейса</string>
+    <string name="menu_rotation">Поворот</string>
+    <string name="menu_rot_album">Поворот на альбомную ориентацию</string>
+    <string name="menu_rot_horizontal">Поворот на горизонтальную ориентацию</string>
+    <string name="menu_fullscreen">Полный экран</string>
+    <string name="menu_fullscreen_off">Выйти из полного экрана</string>
+    <string name="menu_topbar_show">Показать верхнюю плашку</string>
+    <string name="menu_topbar_hide">Скрыть верхнюю плашку</string>
+    <string name="menu_keep_screen">Экран всегда включён</string>
+    <string name="menu_features">Особенности программы</string>
+    <string name="menu_custom_add">Добавить кнопку…</string>
+    <string name="menu_custom_del">Удалить кнопку…</string>
+    <string name="menu_reload">Обновить</string>
+    <string name="menu_about">О программе</string>
+    <string name="menu_exit">Выход из приложения</string>
+
+    <string name="size_custom">Своё…</string>
+    <string name="size_custom_title">Свой размер, %</string>
+    <string name="size_hint">50–300 %</string>
+    <string name="toast_zoom_fmt">Размер интерфейса: %1$d%%</string>
+
+    <string name="custom_name_hint">Название кнопки</string>
+    <string name="custom_url_hint">Адрес: /operator, /display или http://…</string>
+    <string name="custom_empty">Пользовательских кнопок нет</string>
+    <string name="toast_custom_added">Кнопка добавлена в меню</string>
+    <string name="toast_custom_deleted">Кнопка удалена</string>
+
+    <string name="server_find">Найти в сети</string>
+    <string name="server_searching">Поиск табло в локальной сети…</string>
+    <string name="servers_found">Найденные серверы</string>
+    <string name="servers_none">Сервер не найден.\n\nПроверьте: телефон и компьютер в одной сети (один Wi-Fi), программа «Табло» запущена, веб-сервер включён, брандмауэр пропускает UDP 8643.</string>
+    <string name="server_manual">Ввести IP вручную</string>
+    <string name="server_hint">http://192.168.1.50:8642</string>
+    <string name="server_dialog_msg">Адрес компьютера с программой «Табло» — IP и порт веб-сервера (по умолчанию 8642). Можно найти автоматически.</string>
+
+    <string name="features_show_title">Показывать верхнюю плашку «Табло — пульт»</string>
+    <string name="features_text" formatted="false">• Верхняя плашка «Табло — пульт» уменьшена и по умолчанию скрыта. Показ/скрытие — жестом pinch (два пальца): наружу — показать, внутрь — скрыть. То же — пунктом ниже и в меню.\n\n• Меню «⋮»: вид управления, поворот, размер интерфейса, полный экран, пользовательские кнопки, особенности, выход из приложения.\n\n• «Вид управления»: «Пульт оператора», «Панель оператора (увеличенный функционал)», «Витрина».\n\n• Автопоиск сервера: «Адрес сервера…» → «Найти в сети». Работает, если телефон и табло в одной подсети; ручной ввод IP сохранён.\n\n• Пароль: после первого успешного входа приложение предлагает сохранить его локально; при следующем входе поле заполняется автоматически (плюс системный autofill Android и автозаполнение браузера).\n\n• Полный экран: система уходит в immersive; выход — тот же пункт меню, кнопка «Назад» или повторный pinch.\n\n• Размер интерфейса: 75/100/125/150/200 % или своё значение 50–300 %.\n\n• Пользовательские кнопки: имя + адрес (/operator, /display, http://…); добавляются в это меню и удаляются из него.\n\n• Служебные сообщения (например, «игрок удалён») переносятся по словам и не выходят за границы экрана.\n\n• Блокировка входа: 10 попыток, блокировка после 11-й — 15 с, далее 30/45/60/120/300 с.\n\n• При повороте экрана панель не перезагружается; выбранная ориентация запоминается.</string>
+
+    <string name="error_title">Нет связи с табло</string>
+    <string name="error_unknown">неизвестная ошибка</string>
+    <string name="error_detail_fmt">Не удалось открыть %1$s\n\nПричина: %2$s\n\nПроверьте:\n• программа «Табло» запущена на компьютере;\n• веб-сервер включён (Настройки → Режим разработчика → «Включить веб-сервер» → Применить);\n• телефон и компьютер в одной сети (один Wi-Fi);\n• адрес и порт (8642) введены верно.</string>
+    <string name="btn_retry">Повторить</string>
+    <string name="btn_server">Адрес сервера</string>
+    <string-array name="view_names">
+        <item>Пульт оператора</item>
+        <item>Панель оператора (увеличенный функционал)</item>
+        <item>Витрина (только табло, без управления)</item>
+    </string-array>
+</resources>

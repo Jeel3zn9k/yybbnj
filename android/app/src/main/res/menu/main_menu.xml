@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/action_server" android:title="@string/menu_server" />
+    <!-- 1.2: верхняя плашка — первым пунктом, чтобы не искать её прокруткой. -->
+    <item android:id="@+id/action_topbar" android:title="@string/menu_topbar_show" />
+    <item android:id="@+id/action_view" android:title="@string/menu_view" />
+    <item android:id="@+id/action_size" android:title="@string/menu_size" />
+    <item android:id="@+id/action_rotation" android:title="@string/menu_rotation">
+        <menu>
+            <item android:id="@+id/action_rot_album" android:title="@string/menu_rot_album" />
+            <item android:id="@+id/action_rot_horizontal" android:title="@string/menu_rot_horizontal" />
+        </menu>
+    </item>
+    <item android:id="@+id/action_fullscreen" android:title="@string/menu_fullscreen" />
+    <item android:id="@+id/action_keep_screen" android:title="@string/menu_keep_screen" />
+    <item android:id="@+id/action_features" android:title="@string/menu_features" />
+    <item android:id="@+id/action_custom_add" android:title="@string/menu_custom_add" />
+    <item android:id="@+id/action_custom_del" android:title="@string/menu_custom_del" />
+    <item android:id="@+id/action_reload" android:title="@string/menu_reload" />
+    <item android:id="@+id/action_about" android:title="@string/menu_about" />
+    <item android:id="@+id/action_exit" android:title="@string/menu_exit" />
+</menu>

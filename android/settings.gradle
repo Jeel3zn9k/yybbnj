@@ -1,0 +1,17 @@
+// «Табло — пульт»: Android-клиент веб-панели хоккейного табло (с нуля, 2026-11).
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+rootProject.name = "TabloOperator"
+include ':app'

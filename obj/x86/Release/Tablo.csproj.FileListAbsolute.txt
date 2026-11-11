@@ -1,0 +1,11 @@
+C:\Users\IONOV\Desktop\Tavlo_src\Tablo\bin\Release\Tablo.exe.config
+C:\Users\IONOV\Desktop\Tavlo_src\Tablo\bin\Release\Tablo.exe
+C:\Users\IONOV\Desktop\Tavlo_src\Tablo\bin\Release\Tablo.pdb
+C:\Users\IONOV\Desktop\Tavlo_src\Tablo\bin\Release\DirectShowLib-2005.dll
+C:\Users\IONOV\Desktop\Tavlo_src\Tablo\bin\Release\SerialPortControlBoard.dll
+C:\Users\IONOV\Desktop\Tavlo_src\Tablo\bin\Release\TabloHockey.dll
+C:\Users\IONOV\Desktop\Tavlo_src\Tablo\bin\Release\TabloPlayer.dll
+C:\Users\IONOV\Desktop\Tavlo_src\Tablo\bin\Release\TabloHockey.pdb
+C:\Users\IONOV\Desktop\Tavlo_src\Tablo\obj\x86\Release\Tablo.csprojResolveAssemblyReference.cache
+C:\Users\IONOV\Desktop\Tavlo_src\Tablo\obj\x86\Release\Tablo.exe
+C:\Users\IONOV\Desktop\Tavlo_src\Tablo\obj\x86\Release\Tablo.pdb

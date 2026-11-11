@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1, interactive-widget=resizes-content'>
+<title>Пульт оператора</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;background:#101010;color:#eee;font-family:Consolas,'Courier New',monospace;}
+button{background:#222;color:#eee;border:1px solid #555;border-radius:6px;font-size:15px;padding:10px 6px;cursor:pointer;font-family:inherit;}
+button:hover{background:#2e2e2e;}
+button:active{background:#3a3a3a;transform:translateY(1px);}
+button.warn{background:#7a2020;border-color:#c66;}
+input.txt{background:#222;color:#eee;border:1px solid #666;border-radius:6px;font-size:15px;padding:8px;width:100%;font-family:inherit;}
+#login{margin:8vh auto;width:320px;max-width:94vw;text-align:center;padding:0 10px;color:#fff;}
+#login h3{color:#fff;font-size:20px;margin:0 0 10px;}
+#login #pass{width:100%;box-sizing:border-box;background:#000;color:#fff;-webkit-text-fill-color:#fff;border:2px solid #9aa0a6;border-radius:6px;font-size:22px;padding:12px;margin:2px 0;}
+#login #pass:focus{border-color:#ffd54f;outline:2px solid #ffd54f;}
+#login #pass::-webkit-input-placeholder{color:#bdbdbd;opacity:1;}
+#login #pass::placeholder{color:#bdbdbd;opacity:1;}
+#login #pass:-webkit-autofill,#login #pass:-webkit-autofill:hover,#login #pass:-webkit-autofill:focus{-webkit-text-fill-color:#fff;box-shadow:inset 0 0 0 1000px #000;border:2px solid #9aa0a6;}
+#login #pass,#login button,#login #lmsg{forced-color-adjust:none;}
+#login #rem{width:auto;min-width:0;min-height:0;padding:0;margin:0 6px 0 0;background:transparent;border:0;vertical-align:middle;}
+#login label{display:block;margin:8px 0;color:#f0f0f0;font-size:15px;text-align:left;}
+#login button{width:100%;box-sizing:border-box;font-size:18px;padding:12px;margin:6px 0;background:#2d6a2d;color:#fff;border:1px solid #8fd18f;border-radius:6px;}
+#login .linkBtn{font-size:14px;padding:8px;background:#333;color:#fff;border:1px solid #777;}
+#login form{margin:0;}
+#lmsg{color:#ffb3b3;min-height:20px;font-size:15px;background:#33161a;border:1px solid #8a3b45;border-radius:6px;padding:6px 8px;margin:6px 0;}
+#lmsg:empty{background:transparent;border-color:transparent;padding:0;margin:0;}
+#ui{display:none;padding:8px;max-width:1400px;margin:0 auto;}
+.top{display:grid;grid-template-columns:1fr 1fr 1fr;grid-gap:8px;gap:8px;margin-bottom:8px;}
+.top button{font-size:16px;padding:10px 4px;}
+.grid{display:grid;grid-template-columns:1fr 1.25fr 1fr;grid-gap:8px;gap:8px;}
+.col,.center{display:flex;flex-direction:column;}
+.col>*,.center>*{margin:3px 0;}
+.row{display:grid;grid-template-columns:1fr 1fr;grid-gap:8px;gap:8px;}
+/* ПУНКТ 10: пять быстрых шаблонов (+1,5 / +2 / +4 / +5 / Своё) В ОДНУ СТРОКУ,
+   сами кнопки уменьшены. Если в один ряд не помещается - уберите +4: для этого
+   достаточно вернуть для .p4 display:none (см. ниже) и 4 колонки вместо 5. */
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;grid-gap:4px;gap:4px;}
+.row3 button{font-size:12px;padding:8px 1px;}
+.score{background:#000;border:1px solid #444;border-radius:6px;text-align:center;font-size:40px;line-height:1.05;padding:2px 4px;}
+.cap{text-align:center;font-size:11px;color:#9a9a9a;margin-top:2px;}
+.time{background:#000;border:1px solid #444;border-radius:6px;text-align:center;font-size:44px;line-height:1.05;padding:2px 6px;}
+.time2{font-size:20px;line-height:1.2;min-height:0;color:#ffd54f;text-align:center;}
+.time2:empty{display:none;}
+.fix{display:grid;grid-template-columns:1fr 1fr;grid-gap:6px;gap:6px;}
+.per{display:grid;grid-template-columns:1fr 2fr 1fr;grid-gap:6px;gap:6px;align-items:stretch;}
+/* ПУНКТ 9: элемент «ПЕРИОД n» того же размера, что и кнопка «СНЯТЬ ШТРАФ»
+   (база: font-size:15px; padding:10px 6px). Строка стала ниже - все кнопки
+   средней колонки ниже неё поднялись вверх. */
+.per div{background:#000;border:1px solid #444;border-radius:6px;text-align:center;font-size:15px;padding:10px 6px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;}
+.row3 .p4{display:block;}   /* ПУНКТ 10: +4 теперь виден и на широком экране */
+#bBack,#bBrkStop{font-size:13px;padding:8px;}
+#ssBtn{font-size:20px;padding:12px 6px;background:#000;border:1px solid #777;color:#fff;border-radius:8px;}
+.pens{background:#181818;border:1px solid #333;border-radius:6px;padding:4px;min-height:40px;font-size:12px;}
+.pens div{padding:2px 4px;border-bottom:1px dashed #333;cursor:pointer;}
+/* ЕДИНАЯ ЛОГИКА СНЯТИЯ: строку удаления можно выбрать кликом (подсветка),
+   затем «СНЯТЬ ШТРАФ» снимет её сразу; не выбрана - откроется окно 2x2. */
+.pens div.sel{background:#2a5a2a;color:#fff;}
+/* Окно снятия - сетка 2×2 (клетки табло), как в версии для ПК и телефона.
+   СКРИНШОТ 3: клик по клетке с игроком снимает удаление сразу, без «СНЯТЬ». */
+.remGrid{display:grid;grid-template-columns:1fr 1fr;grid-gap:6px;gap:6px;margin:6px 0;}
+.remCell{background:#222;border:2px solid #555;color:#eee;padding:8px 4px;margin:0;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;}
+.remCell .remCap{font-size:11px;color:#9a9a9a;display:block;}
+.remCell .remVal{font-size:17px;color:#fff;display:block;margin-top:3px;}
+.remCell.busy{border-color:#6c6;}
+.remCell.emptyCell{border-color:#3a3a3a;cursor:default;}
+.remCell.emptyCell .remVal{color:#777;}
+.remHint{font-size:12px;color:#bbb;line-height:1.35;margin:2px 0 6px;text-align:left;}
+.remOr{font-size:12px;color:#999;text-align:center;margin:8px 0 4px;}
+.team{flex:1 1 45%;min-width:80px;}
+.team.on{background:#2a5a2a;border-color:#6c6;color:#fff;}
+.badge{font-size:10px;color:#9a9a9a;text-align:center;min-height:14px;}
+#toast{position:fixed;left:8px;right:8px;bottom:18px;width:auto;box-sizing:border-box;background:#222;border:1px solid #555;border-radius:6px;padding:10px 14px;font-size:15px;display:none;z-index:60;white-space:normal;overflow-wrap:anywhere;word-break:break-word;max-height:40vh;overflow-y:auto;text-align:center;}
+#toast.ok{border-color:#4c4;color:#cfc;}
+#toast.err{border-color:#c44;color:#fcc;}
+.modal{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,0.65);display:none;align-items:center;justify-content:center;z-index:50;}
+.modal.on{display:flex;}
+.box{background:#1b1b1b;border:1px solid #555;border-radius:8px;padding:16px;width:330px;max-width:92vw;}
+.box h3{margin:0 0 10px;font-size:18px;}
+.box .err{color:#f88;font-size:13px;min-height:18px;margin:6px 0;}
+.acts{display:grid;grid-template-columns:1fr 1fr;grid-gap:10px;gap:10px;margin-top:10px;}
+@media (max-width:1100px){
+#ui{padding:6px;}
+button{font-size:13px;padding:8px 4px;}
+.top{grid-gap:6px;gap:6px;margin-bottom:6px;}
+.top button{font-size:13px;padding:8px 2px;}
+.grid{grid-gap:6px;gap:6px;}
+.col>*,.center>*{margin:2px 0;}
+.row{grid-gap:6px;gap:6px;}
+.row3{grid-gap:4px;gap:4px;}
+.score{font-size:32px;}
+.time{font-size:34px;}
+.time2{font-size:16px;}
+.cap{font-size:9px;}
+.badge{font-size:9px;}
+input.txt{font-size:13px;padding:6px;}
+.per div{font-size:13px;padding:8px 4px;}
+#ssBtn{font-size:17px;padding:10px 4px;}
+.pens{font-size:10px;min-height:32px;}
+#ssBtn{font-size:26px;padding:15px 6px;}
+.row button{font-size:16px;padding:12px 4px;}
+.row3{grid-template-columns:1fr 1fr 1fr 1fr 1fr;}
+.row3 button{font-size:11px;padding:8px 1px;}
+.row3 .p4{display:block;}
+#bBack,#bBrkStop{width:auto;align-self:center;padding:8px 3%;}
+}
+@media (max-width:700px){
+#ui{padding:4px;}
+button{font-size:11px;padding:6px 2px;min-height:44px;}
+.top{grid-gap:4px;gap:4px;margin-bottom:4px;}
+.top button{font-size:11px;padding:6px 2px;}
+.grid{grid-gap:4px;gap:4px;}
+.col>*,.center>*{margin:2px 0;}
+.row{grid-gap:4px;gap:4px;}
+.row3{grid-gap:3px;gap:3px;}
+.score{font-size:24px;}
+.time{font-size:26px;}
+.time2{font-size:13px;}
+.cap{font-size:8px;}
+.badge{font-size:8px;}
+input.txt{font-size:11px;padding:4px;}
+.per div{font-size:11px;padding:6px 2px;min-height:44px;}
+#ssBtn{font-size:14px;padding:8px 2px;}
+.pens{font-size:9px;min-height:26px;}
+#ssBtn{font-size:21px;padding:12px 4px;}
+.row button{font-size:13px;padding:9px 3px;}
+.row3{grid-template-columns:1fr 1fr 1fr 1fr 1fr;}
+.row3 button{font-size:10px;padding:9px 1px;}
+.row3 .p4{display:block;}
+#bBack,#bBrkStop{width:auto;align-self:center;padding:6px 3%;}
+}
+@media (max-height:520px){
+#ui{padding:4px;}
+.top{grid-gap:4px;gap:4px;margin-bottom:4px;}
+.top button{font-size:11px;padding:5px 2px;}
+button{font-size:10px;padding:5px 2px;}
+.grid{grid-gap:4px;gap:4px;}
+.col>*,.center>*{margin:2px 0;}
+.row{grid-gap:4px;gap:4px;}
+.row3{grid-gap:3px;gap:3px;}
+.score{font-size:20px;}
+.time{font-size:22px;}
+.time2{font-size:12px;}
+.cap{font-size:8px;}
+.badge{font-size:8px;}
+input.txt{font-size:10px;padding:3px;}
+.per div{font-size:10px;padding:5px 2px;}
+#ssBtn{font-size:13px;padding:6px 2px;}
+.pens{font-size:9px;min-height:22px;}
+#ssBtn{font-size:20px;padding:10px 4px;}
+.row button{font-size:12px;padding:8px 3px;}
+.row3{grid-template-columns:1fr 1fr 1fr 1fr 1fr;}
+.row3 button{font-size:9px;padding:6px 1px;}
+.row3 .p4{display:block;}
+#bBack,#bBrkStop{width:auto;align-self:center;padding:5px 3%;}
+}
+
+/* ===== 1.2: UI lock, split break/time-reset, APK-only simplification ===== */
+.top{grid-template-columns:44px 0.72fr 1.1fr 1.1fr;}
+#lockBtn{font-size:20px;padding:0;min-height:44px;}
+#uiLockOverlay{display:none;position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(30,30,30,0.55);z-index:80;}
+body.locked #uiLockOverlay{display:block;}
+#lockBtn{position:relative;z-index:90;}
+body.locked #lockBtn{background:#7a2020;border-color:#f88;}
+.row2{display:grid;grid-template-columns:1.35fr 1fr;grid-gap:5px;gap:5px;margin:2px 0;}
+.row2 button{width:100%;min-width:0;}
+#bBack{display:block;width:auto;align-self:center;font-size:13px;padding:8px 3%;margin-top:4px;}
+body.apk #bBack,body.apk #mRem .remTeamRow,body.apk #mRem #mRemN,body.apk #mRem #mRemE,body.apk #mRem .remOr,body.apk #mRem .acts{display:none!important;}
+.modal .box{position:relative;}
+.modalX{position:absolute;top:6px;right:8px;width:30px;height:30px;min-height:0!important;padding:0;margin:0;font-size:20px;line-height:24px;background:transparent;border:0;color:#ddd;cursor:pointer;z-index:2;}
+.modalX:hover{color:#fff;}
+.holdBar{height:10px;background:#333;border:1px solid #666;border-radius:5px;margin:10px 0 2px;overflow:hidden;}
+.holdBar i{display:block;height:100%;width:0;background:#c33;transition:width .05s linear;}
+.holdHint{font-size:12px;color:#bbb;text-align:center;margin:2px 0 4px;}
+#mBreak .txt[readonly]{opacity:.75;}
+</style>
+</head>
+<body>
+<div id='login'>
+<h3>Панель оператора</h3>
+<div id='lmsg'></div>
+<form id='loginForm' autocomplete='on' onsubmit='return false;'>
+<input type='password' id='pass' name='password' autocomplete='current-password' autocapitalize='off' spellcheck='false' placeholder='Пароль'>
+<label><input type='checkbox' id='rem'>Запомнить вход</label>
+<button id='lg' type='button'>Войти</button>
+</form>
+<button id='featBtnLogin' type='button' class='linkBtn'>Особенности программы</button>
+</div>
+<div id='ui'>
+<div class='top'>
+<button id='lockBtn' type='button' title='Блокировка интерфейса'>&#128275;</button>
+<button id='bBreak'>ПЕРЕРЫВ</button>
+<button id='bReset' class='warn'>МАТЧ-СБРОС</button>
+<button id='bSiren'>СИРЕНА</button>
+</div>
+<div class='grid'>
+<div class='col'>
+<div class='row'><button id='hGp'>Г+</button><button id='hGm'>Г-</button></div>
+<div><div class='score' id='sH'>0</div><div class='cap'>Счёт хозяев</div></div>
+<div class='row'><button id='hTp'>Т+</button><button id='hTm'>Т-</button></div>
+<div class='badge' id='hTo'>таймаутов: 0</div>
+<div class='row3'><button id='hP15'>+1,5</button><button id='hP2'>+2</button><button id='hP4' class='p4'>+4</button><button id='hP5'>+5</button><button id='hPc'>Своё</button></div>
+<button id='hRem'>СНЯТЬ ШТРАФ</button>
+<div class='pens' id='pH'><div>нет удалений</div></div>
+</div>
+<div class='center'>
+<div><div class='time' id='tV'>--:--</div><div class='time2' id='tV2'></div></div>
+<div class='fix'><input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type='text' class='txt' id='fixIn' placeholder='MM:SS / MMSS / MMSSms' inputmode='numeric' pattern='[0-9]*'><button id='fixOk'>ПОДТВЕРДИТЬ</button></div> 
+<div class='badge' id='refShow' style='min-height:18px;text-align:left;'>Эталон: -</div>
+<div class='fix'><input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type='text' class='txt' id='rm' placeholder='MM:SS' inputmode='numeric' pattern='[0-9]*'><input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type='text' class='txt' id='ro' placeholder='MM:SS' inputmode='numeric' pattern='[0-9]*'></div>
+<div class='row'><button id='bRefRemember'>ЗАПОМНИТЬ</button><button id='bRefEdit'>ПРАВИТЬ</button></div>
+<div class='per'><button id='pPrev'>-</button><div id='pV'>ПЕРИОД 1</div><button id='pNext'>+</button></div>
+<button id='ssBtn'>СТАРТ-СТОП</button>
+<div class='row2'><button id='bBrkStop'>Остановить перерыв</button><button id='bTimeReset'>Сбросить время</button></div>
+<button id='bBack' type='button'>Панель оператора</button>
+</div>
+<div class='col'>
+<div class='row'><button id='aGp'>Г+</button><button id='aGm'>Г-</button></div>
+<div><div class='score' id='sA'>0</div><div class='cap'>Счёт гостей</div></div>
+<div class='row'><button id='aTp'>Т+</button><button id='aTm'>Т-</button></div>
+<div class='badge' id='aTo'>таймаутов: 0</div>
+<div class='row3'><button id='aP15'>+1,5</button><button id='aP2'>+2</button><button id='aP4' class='p4'>+4</button><button id='aP5'>+5</button><button id='aPc'>Своё</button></div>
+<button id='aRem'>СНЯТЬ ШТРАФ</button>
+<div class='pens' id='pA'><div>нет удалений</div></div>
+</div>
+</div>
+</div>
+<div id='toast'></div>
+<div id='uiLockOverlay'></div>
+<div class='modal' id='mPen'><div class='box'>
+<h3 id='mPenT'>Штраф</h3>
+<input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type='text' class='txt' id='mPenN' placeholder='Номер игрока 1-99' inputmode='numeric' pattern='[0-9]*'>
+<input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type='text' class='txt' id='mPenM' placeholder='Время штрафа MM:SS или минут' style='display:none;margin-top:8px;' inputmode='numeric' pattern='[0-9]*'>
+<div class='err' id='mPenE'></div>
+<div class='acts'><button id='mPenC'>Отмена</button><button id='mPenOk'>ДОБАВИТЬ</button></div>
+</div></div>
+<div class='modal' id='mRem'><div class='box'>
+<h3 id='mRemT'>Снять штраф</h3>
+<!-- ЕДИНАЯ ЛОГИКА: окно снятия как в версии для ПК и телефона - сетка 2×2 (клетки табло).
+     СКРИНШОТ 3: клик по клетке с игроком снимает удаление сразу; «СНЯТЬ» - только для снятия по номеру. -->
+<div class='remGrid'>
+<button type='button' class='remCell' id='rc_h0'><span class='remCap'>1×1 ХОЗЯЕВА</span><span class='remVal'>—</span></button>
+<button type='button' class='remCell' id='rc_a0'><span class='remCap'>1×2 ГОСТИ</span><span class='remVal'>—</span></button>
+<button type='button' class='remCell' id='rc_h1'><span class='remCap'>2×1 ХОЗЯЕВА</span><span class='remVal'>—</span></button>
+<button type='button' class='remCell' id='rc_a1'><span class='remCap'>2×2 ГОСТИ</span><span class='remVal'>—</span></button>
+</div>
+<div class='remHint'>Нажмите клетку с игроком — удаление снимется сразу. Пустая клетка недоступна.</div>
+<div class='remOr'>— или по номеру игрока —</div>
+<div class='row remTeamRow'><button id='mRemTH' type='button' class='team on'>ХОЗЯЕВА</button><button id='mRemTA' type='button' class='team'>ГОСТИ</button></div>
+<input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type='text' class='txt' id='mRemN' placeholder='Номер игрока 1-99' inputmode='numeric' pattern='[0-9]*' style='margin-top:8px;'>
+<div class='err' id='mRemE'></div>
+<div class='acts'><button id='mRemC'>Отмена</button><button id='mRemOk'>СНЯТЬ</button></div>
+</div></div>
+<div class='modal' id='mFeat'><div class='box' style='width:560px;max-width:94vw;'>
+<h3>Особенности программы</h3>
+<div id='featText' style='font-size:13px;line-height:1.45;max-height:62vh;overflow:auto;white-space:pre-line;text-align:left;color:#ddd;'></div>
+<div class='acts' style='grid-template-columns:1fr;'><button id='mFeatC'>Закрыть</button></div>
+</div></div>
+<div class='modal' id='mBreak'><div class='box'>
+<h3>Время перерыва</h3>
+<input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type='text' class='txt' id='brkVal' inputmode='numeric' pattern='[0-9]*' readonly>
+<div class='err' id='brkErr'></div>
+<div class='acts'><button id='mBreakC' type='button'>Отмена</button><button id='mBreakOk' type='button'>Подтвердить</button></div>
+</div></div>
+<div class='modal' id='mTimeReset'><div class='box'>
+<h3>Сбросить время?</h3>
+<div style='font-size:14px;line-height:1.5;'>Часы остановятся, время вернётся к последнему ручному значению (если оно не задавалось — к эталону текущего периода).</div>
+<div class='holdBar'><i></i></div><div class='holdHint'>Удерживайте кнопку 2 секунды</div>
+<div class='acts'><button id='mTimeResetC' type='button'>Отмена</button><button id='mTimeResetOk' type='button' class='warn'>СБРОСИТЬ</button></div>
+</div></div>
+<div class='modal' id='mPeriod'><div class='box'>
+<h3>Идёт время периода!</h3>
+<div style='font-size:14px;line-height:1.5;'>Переключиться на другой период?<br>Часы остановятся, время периода вернётся к эталону.</div>
+<div class='acts'><button id='mPeriodC' type='button'>Нет</button><button id='mPeriodOk' type='button' class='warn'>Да</button></div>
+</div></div>
+<div class='modal' id='mReset'><div class='box'>
+<h3>ВНИМАНИЕ: полный сброс матча</h3>
+<div style='font-size:14px;line-height:1.5;'>Обнуляются счёт, период, игровое время, все удаления и таймауты обеих команд. Нажмите СБРОС для второго подтверждения или Отмена для выхода.</div>
+<div class='holdBar'><i></i></div><div class='holdHint'>Удерживайте СБРОС 2 секунды</div>
+<div class='acts'><button id='mResetC'>Отмена</button><button id='mResetOk' class='warn'>СБРОС</button></div>
+</div></div>
+<script>
+var token='';var PASS_KEY='tablo_saved_pass';var loginBusy=false;var RUN=false;var GOD=false;var breakSec=0;var IS_APK=/TabloAndroid/i.test(navigator.userAgent);var locked=false;var pendRem=null;var penTeam='h';var penMin=null;var pollFail=0;var refKey='';var refDirty=false;
+function setTok(x){try{x.setRequestHeader('X-Tablo-Token',token);}catch(e){}}
+function fmtWait(s){s=+s||60;if(s>=3600)return Math.round(s/3600)+' ч';if(s>=60)return Math.round(s/60)+' мин';return s+' сек';}
+function el(i){return document.getElementById(i);}
+function toast(m,ok){var t=el('toast');if(!t)return;t.textContent=m;t.className=ok?'ok':'err';t.style.display='block';setTimeout(function(){t.style.display='none';},3000);}
+function pad2(n){return (n<10?'0':'')+n;}
+function parseSec(v){
+v=(''+(v==null?'':v)).trim();
+if(v==='')return -1;
+var parts=v.split(':');
+var h=0,m=0,s=0;
+if(parts.length===3){h=+parts[0];m=+parts[1];s=+parts[2];}
+else if(parts.length===2){m=+parts[0];s=+parts[1];}
+else if(parts.length===1){
+var d=parts[0];
+if(!/^\d+$/.test(d))return -1;
+if(d.length===6){h=+d.substr(0,2);m=+d.substr(2,2);s=+d.substr(4,2);}
+else if(d.length===4){m=+d.substr(0,2);s=+d.substr(2,2);}
+else if(d.length===3){m=+d.substr(0,1);s=+d.substr(1,2);}
+else if(d.length===2){m=+d;}
+else if(d.length===1){m=+d;}
+else return -1;
+}else return -1;
+if(isNaN(h)||isNaN(m)||isNaN(s))return -1;
+if(s<0||s>59||m<0||m>59||h<0||h>9)return -1;
+return h*3600+m*60+s;}
+function parseMs(v){v=(''+(v==null?'':v)).trim();if(v==='')return -1;
+var parts=v.split(':');var h=0,m=0,s=0,cc=0;
+if(parts.length===3){h=+parts[0];m=+parts[1];s=+parts[2];}
+else if(parts.length===2){m=+parts[0];s=+parts[1];}
+else if(parts.length===1){var d=parts[0];if(!/^\d+$/.test(d))return -1;
+if(d.length===6){m=+d.substr(0,2);s=+d.substr(2,2);cc=+d.substr(4,2);}
+else if(d.length===4){m=+d.substr(0,2);s=+d.substr(2,2);}
+else if(d.length===3){m=+d.substr(0,1);s=+d.substr(1,2);}
+else if(d.length===2||d.length===1){m=+d;}
+else return -1;}
+else return -1;
+if(isNaN(h)||isNaN(m)||isNaN(s)||isNaN(cc))return -1;
+if(s<0||s>59||m<0||m>59||h<0||h>9||cc<0||cc>99)return -1;
+return ((h*3600+m*60+s)*1000)+cc*10;}
+function fmtMs(v){v=+v;if(isNaN(v)||v<0)return '';var cs=Math.floor(v/10);
+var m=Math.floor(cs/6000),s=Math.floor(cs/100)%60,cc=cs%100;
+return pad2(m)+':'+pad2(s)+(cc>0?(':'+pad2(cc)):'');}
+function readNum(v){var n=parseInt((''+v).trim(),10);if(isNaN(n)||n<1||n>99)return -1;return n;}
+/* ЕДИНАЯ ЛОГИКА СНЯТИЯ (все интерфейсы): строки удалений кликабельны - клик выбирает
+   строку (подсветка), затем «СНЯТЬ ШТРАФ» снимает её сразу. Если строка не выбрана -
+   «СНЯТЬ ШТРАФ» открывает окно 2×2 с вводом игрока (как в версии для ПК и телефона). */
+function rowsOfP(str,team){var out=[];var arr=(''+(str||'')).split('; ');
+for(var i=0;i<arr.length;i++){var t=arr[i];if(!t)continue;
+var n=parseInt(t.substring(0,2),10);
+out.push({team:team,idx:out.length,num:isNaN(n)?0:n,raw:t});}
+return out;}
+var rowsCacheP={h:[],a:[]};var penSelP=null;var penSigP='';
+function rowAtP(team,idx){var src=(team=='h')?rowsCacheP.h:rowsCacheP.a;
+for(var i=0;i<src.length;i++){if(src[i].idx==idx)return src[i];}
+return null;}
+function paintPensP(){var map=[['pH','pA'],['h','a']];
+for(var m=0;m<2;m++){var box=el(map[0][m]);if(!box)continue;
+var team=map[1][m];var rows=rowsCacheP[team];box.innerHTML='';
+if(rows.length==0){var d0=document.createElement('div');d0.textContent='нет удалений';box.appendChild(d0);continue;}
+for(var k=0;k<rows.length;k++){(function(r){var d=document.createElement('div');d.textContent=r.raw;
+if(penSelP&&penSelP.team==r.team&&penSelP.idx==r.idx){d.className='sel';}
+d.onclick=function(){if(penSelP&&penSelP.team==r.team&&penSelP.idx==r.idx){penSelP=null;}
+else{penSelP={team:r.team,idx:r.idx,num:r.num};}
+paintPensP();};
+box.appendChild(d);})(rows[k]);}}}
+function renderPensP(s){rowsCacheP.h=rowsOfP(s.pen_h,'h');rowsCacheP.a=rowsOfP(s.pen_a,'a');
+if(penSelP){var r=rowAtP(penSelP.team,penSelP.idx);if(!r||r.num!=penSelP.num){penSelP=null;}}
+var sig='';var i;
+for(i=0;i<rowsCacheP.h.length;i++){sig+='h'+rowsCacheP.h[i].idx+rowsCacheP.h[i].raw+'|';}
+for(i=0;i<rowsCacheP.a.length;i++){sig+='a'+rowsCacheP.a[i].idx+rowsCacheP.a[i].raw+'|';}
+if(sig==penSigP){return;}
+penSigP=sig;paintPensP();}
+function cmd(k,p){if(!token)return;var x=new XMLHttpRequest();
+/* О-9 (аудит 2026-11): команды изменения состояния — только POST (защита от CSRF
+   через <img>/prefetch); GET остаётся лишь для чтения состояния. */
+x.open('POST','/cmd?key='+k+'&p='+(p||0),true);setTok(x);
+x.onload=function(){if(x.status==403){relogin('Сессия завершена — войдите снова');return;}
+var r={};try{r=JSON.parse(x.responseText);}catch(e){}
+if(r.ok!==1){toast((r.err==2)?'Отклонено: сейчас идёт время периода':'Команда отклонена программой (код '+(r.err||0)+')',false);}};
+x.onerror=function(){toast('Нет связи с программой',false);};
+x.send('');}
+function poll(){if(!token){return;}var x=new XMLHttpRequest();x.open('GET','/state.json?ts='+new Date().getTime(),true);setTok(x);
+x.onload=function(){if(x.status==403){relogin('Сессия завершена — войдите снова');return;}setTimeout(poll,500);
+var raw=x.responseText;var s=null;var perr='';
+try{s=JSON.parse(raw);}catch(e){perr=(''+((e&&e.message)?e.message:'неизвестная ошибка'));}
+if(!s){pollFail++;if(pollFail==5){toast('Панель: не-JSON: '+perr+' | хвост: '+raw.substring(raw.length-100),false);pollFail=0;}return;}
+if(!s||typeof s!=='object'){pollFail++;if(pollFail==5){toast('Панель: не-JSON, тело: '+raw.substring(0,60),false);pollFail=0;}return;}
+pollFail=0;
+try{el('sH').textContent=s.score_h;el('sA').textContent=s.score_a;}catch(e){}
+try{el('tV').textContent=s.value||'--:--';el('tV2').textContent=s.value2||'';}catch(e){}
+try{el('pV').textContent='ПЕРИОД '+(s.period||1);}catch(e){}
+try{el('hTo').textContent='таймаутов: '+(s.to_h||0);el('aTo').textContent='таймаутов: '+(s.to_a||0);}catch(e){}
+try{renderPensP(s);}catch(e){}
+try{
+var remembered=((+s.ref_main)>=0)||((+s.ref_ot)>=0);
+var key=(s.ref_main)+'|'+(s.ref_ot)+'|'+(s.ref_lock);
+if(refKey===''){refKey=key;}
+var changed=(key!==refKey);
+if(changed){refKey=key;refDirty=false;}
+var rs=el('refShow');
+if(rs){
+if(remembered){rs.textContent='Эталон: осн '+fmtP(s.ref_main)+' | овт '+fmtP(s.ref_ot)+' | '+((s.ref_lock==1)?'БЛОК':'ОТКР');}
+else{rs.textContent='Эталон: осн '+fmtP(s.game_sec)+' | овт '+fmtP(s.ot_sec)+' | НЕ ЗАПОМНЕН (текущая настройка)';}
+}
+if(!refDirty&&(changed||!remembered)){
+var eR=el('rm'),eO=el('ro');
+if(eR&&document.activeElement!==eR){eR.value=remembered?fmtP(s.ref_main):fmtP(s.game_sec);}
+if(eO&&document.activeElement!==eO){eO.value=remembered?fmtP(s.ref_ot):fmtP(s.ot_sec);}
+}
+}catch(e){}
+RUN=(s.run==1);MODE=s.mode||'';GOD=(s.god==1);breakSec=+(s.break_sec||0);var elaps=+(s.elapsed||0);
+try{el('ssBtn').style.background=RUN?'#c00000':(elaps>0?'#0055cc':'#000000');}catch(e){}
+if(pendRem){pendRem.wait--;
+if(pendRem.wait<=0){var rowsP=(pendRem.team=='h')?rowsOfP(s.pen_h,'h'):rowsOfP(s.pen_a,'a');
+var stillP=false;
+if(pendRem.byRow){var rP=null;for(var iP=0;iP<rowsP.length;iP++){if(rowsP[iP].idx==pendRem.idx){rP=rowsP[iP];break;}}
+stillP=(rP&&rP.num==pendRem.num);}
+else{for(var jP=0;jP<rowsP.length;jP++){if(rowsP[jP].num==pendRem.num){stillP=true;break;}}}
+if(stillP){toast('Не снято: '+((pendRem.team=='h')?'хозяева':'гости')+', №'+pendRem.num+' — всё ещё на месте',false);}
+else{toast('Снято: '+((pendRem.team=='h')?'хозяева':'гости')+', №'+pendRem.num,true);}
+pendRem=null;}}};
+x.onerror=function(){setTimeout(poll,1500);pollFail++;if(pollFail==5){toast('Панель: нет связи с сервером',false);pollFail=0;}};
+x.send();}
+function openPen(team,min){penTeam=team;penMin=min;
+/* ПУНКТ 10: дробные шаблоны (1,5 мин) показываем с запятой, как в русском интерфейсе */
+el('mPenT').textContent='Штраф: '+(team=='h'?'ХОЗЯЕВА':'ГОСТИ')+(min==null?' (своё время)':(' ('+(''+min).replace('.',',')+' мин)'));
+el('mPenM').style.display=(min==null)?'block':'none';
+el('mPenN').value='';el('mPenM').value='';el('mPenE').textContent='';
+el('mPen').className='modal on';if(!IS_APK){setTimeout(function(){try{el('mPenN').focus();}catch(e){}},50);}}
+function closePen(){el('mPen').className='modal';}
+var remNumTeam='h';   // команда для снятия по номеру в окне 2×2
+/* Снятие конкретной строки (клетки табло) - ровно одна строка. */
+function doRemRowP(team,idx,num){pendRem={team:team,idx:idx,num:num,wait:2,byRow:true};
+cmd(team=='h'?'pen_rem_row_h':'pen_rem_row_a',idx*100+num);}
+/* Снятие по номеру - первая строка этого номера у выбранной команды. */
+function doRemNumP(team,num){pendRem={team:team,idx:-1,num:num,wait:2,byRow:false};
+cmd(team=='h'?'pen_rem_h':'pen_rem_a',num);}
+function fillRemGridP(){var keys=[['h',0,'rc_h0'],['a',0,'rc_a0'],['h',1,'rc_h1'],['a',1,'rc_a1']];
+for(var i=0;i<keys.length;i++){var b=el(keys[i][2]);if(!b)continue;
+var r=rowAtP(keys[i][0],keys[i][1]);
+var sp=b.getElementsByTagName('span');
+if(sp.length>1){sp[1].textContent=r?r.raw:'—';}
+b.className='remCell'+(r?' busy':' emptyCell');
+b.disabled=!r;}}
+/* СКРИНШОТ 3: клик по клетке с игроком снимает удаление сразу, без «СНЯТЬ». */
+function remCellClickP(){var id=this.id;var t=id.charAt(3);var i=+id.charAt(4);
+var r=rowAtP(t,i);if(!r)return;
+closeRem();doRemRowP(t,i,r.num);}
+/* ЕДИНАЯ ЛОГИКА: выбрана строка своего списка - «СНЯТЬ ШТРАФ» снимает её сразу;
+   не выбрана - открывается окно 2×2 с вводом игрока. */
+function remByTeam(team){if(penSelP&&penSelP.team==team){var t=penSelP.team,i=penSelP.idx,n=penSelP.num;
+penSelP=null;paintPensP();doRemRowP(t,i,n);}
+else{openRem(team);}}
+function openRem(team){penTeam=team;remNumTeam=team;
+el('mRemT').textContent='Снять штраф: '+(team=='h'?'ХОЗЯЕВА':'ГОСТИ');
+el('mRemTH').className='team'+(team=='h'?' on':'');
+el('mRemTA').className='team'+(team=='a'?' on':'');
+el('mRemN').value='';el('mRemE').textContent='';fillRemGridP();
+el('mRem').className='modal on';if(!IS_APK){setTimeout(function(){try{el('mRemN').focus();}catch(e){}},50);}}
+function closeRem(){el('mRem').className='modal';}
+function submitPen(){var n=readNum(el('mPenN').value);
+if(n<0){el('mPenE').textContent='Номер: целое число 1-99';return;}
+var min=penMin;
+if(min==null){var sec=parseSec(el('mPenM').value);
+if(sec<0){el('mPenE').textContent='Время: MM:SS или MMSS (секунды < 60)';return;}
+if(sec%60!==0){closePen();cmd(penTeam=='h'?'pen_add_sec_h':'pen_add_sec_a',n*10000+sec);
+toast('Штраф добавлен: №'+n+', '+Math.floor(sec/60)+' мин '+pad2(sec%60)+' сек',true);return;}
+min=Math.floor(sec/60);}
+if(min<1||min>99){el('mPenE').textContent='Время штрафа: 1-99 минут';return;}
+closePen();
+/* ПУНКТ 10: «+1,5» = 90 секунд. Команда pen_add_* передаёт минуты целым числом
+   (n*100+минуты), поэтому дробные шаблоны уходят через pen_add_sec_* в секундах
+   (n*10000+секунды) — ровно так же, как «Своё» время с секундами. */
+var msec=Math.round(min*60);
+if(msec%60!==0){cmd(penTeam=='h'?'pen_add_sec_h':'pen_add_sec_a',n*10000+msec);
+toast('Штраф добавлен: №'+n+', '+Math.floor(msec/60)+' мин '+pad2(msec%60)+' сек',true);return;}
+cmd(penTeam=='h'?'pen_add_h':'pen_add_a',n*100+min);
+toast('Штраф добавлен: №'+n+', '+min+' мин',true);}
+function submitRem(){var n=readNum(el('mRemN').value);
+if(n<0){el('mRemE').textContent='Номер: целое число 1-99 (или нажмите клетку с игроком выше)';return;}
+closeRem();doRemNumP(remNumTeam,n);}
+function submitFix(){var ms=parseMs(el('fixIn').value);
+if(ms<0){toast('Формат коррекции: MM:SS, MMSS или MMSSms (034498 = 03:44.98)',false);return;}
+cmd('time_set_ms',ms);el('fixIn').value='';
+toast('Коррекция времени отправлена: '+fmtMs(ms),true);}
+function start(){el('login').style.display='none';el('ui').style.display='block';poll();}
+function relogin(m){token='';try{localStorage.removeItem('tablo_token');}catch(e){}el('ui').style.display='none';el('login').style.display='block';if(m)toast(m,false);}
+function b64e(x){try{return btoa(unescape(encodeURIComponent(x)));}catch(e){return '';}}
+function b64d(x){try{return decodeURIComponent(escape(atob(x)));}catch(e){return '';}}
+function savedPass(){try{return b64d(localStorage.getItem(PASS_KEY)||'');}catch(e){return '';}}
+function offerSavePassword(pv){var old=savedPass();
+if(pv&&pv!==old&&confirm('Сохранить пароль для автоматического входа?')){
+try{localStorage.setItem(PASS_KEY,b64e(pv));}catch(e){}}}
+var FEATURES_TEXT='Особенности программы 1.2\n\n'
++'• Верхняя плашка «Табло — пульт» уменьшена и по умолчанию скрыта. Pinch двумя пальцами: наружу — показать, внутрь — скрыть. Настройка — в меню Android «Особенности программы».\n'
++'• Вид управления выбирается в меню Android: «Пульт оператора», «Панель оператора (увеличенный функционал)», «Витрина». Кнопок смены вида на странице больше нет.\n'
++'• Автопоиск сервера: «Адрес сервера…» → «Найти в сети»; ручной ввод IP сохранён.\n'
++'• Пароль сохраняется локально после первого успешного входа и подставляется при следующем входе (autofill Android/браузера).\n'
++'• Полный экран: пункт меню или «Назад» — выход.\n'
++'• Размер интерфейса 75–200 % или своё значение 50–300 %; пользовательские кнопки — в меню Android.\n'
++'• Служебные сообщения переносятся по словам и не выходят за границы экрана.\n'
++'• Блокировка входа: 10 попыток, после 11-й — 15/30/45/60/120/300 сек.';
+function initLoginUi(){try{var sp=savedPass();if(sp&&el('pass')&&!el('pass').value){el('pass').value=sp;}}catch(e){}
+if(el('loginForm')){el('loginForm').onsubmit=function(ev){if(ev&&ev.preventDefault){ev.preventDefault();}doLogin();return false;};}
+if(el('featBtnLogin')){el('featBtnLogin').onclick=openFeatures;}
+if(el('mFeatC')){el('mFeatC').onclick=function(){el('mFeat').className='modal';};}
+if(el('featText')){el('featText').textContent=FEATURES_TEXT;}}
+function openFeatures(){if(window.TabloAndroid&&TabloAndroid.openFeatures){try{TabloAndroid.openFeatures();return;}catch(e){}}if(el('mFeat')){el('mFeat').className='modal on';}}
+function doLogin(){if(loginBusy)return;var pv=el('pass').value;if(pv===''){el('lmsg').textContent='Введите пароль';return;}loginBusy=true;
+var x=new XMLHttpRequest();x.open('POST','/login',true);
+x.onload=function(){loginBusy=false;if(x.status==200){var r=JSON.parse(x.responseText);token=r.token;offerSavePassword(pv);
+if(el('rem')&&el('rem').checked){try{localStorage.setItem('tablo_token',token);}catch(e){}}else{try{localStorage.removeItem('tablo_token');}catch(e){}}
+start();}else{var r2={};try{r2=JSON.parse(x.responseText);}catch(e){}
+var l2=(+r2.left);el('lmsg').textContent=(r2.error==4)?(('Блокировка №'+(r2.level||1)+'. Подождите '+fmtWait(r2.wait)+'; после разблокировки снова '+((+r2.attempts)||10)+' попыток.')):('Неверный пароль.'+(l2>0?(' Осталось попыток: '+l2+' из '+((+r2.attempts)||10)+'.'):''));}};
+x.onerror=function(){loginBusy=false;el('lmsg').textContent='Нет связи с программой';};
+x.send('pass='+encodeURIComponent(pv));}
+function enterAs(btnId){return function(e){var ev=e||window.event;
+if(ev.key==='Enter'||ev.keyCode===13||ev.which===13){
+var a=document.activeElement;
+if(a&&a.tagName==='BUTTON'){return;}
+if(ev.preventDefault){ev.preventDefault();}
+el(btnId).onclick();}};}
+el('lg').onclick=doLogin;
+el('pass').onkeydown=enterAs('lg');
+var MODE='';
+el('bBack').onclick=function(){location.href='/operator';};
+el('bBrkStop').onclick=function(){if(MODE!='BRK'){toast('Перерыв сейчас не идёт',false);return;}cmd('stop',0);toast('Перерыв остановлен',true);};
+document.addEventListener('keydown',function(e){var ev=e||window.event;
+if(ev.keyCode==32||ev.key===' '){var a=document.activeElement;
+if(a&&(a.tagName==='BUTTON'||a.tagName==='INPUT'||a.tagName==='TEXTAREA'))return;
+if(ev.preventDefault){ev.preventDefault();}
+el('ssBtn').onclick();}});
+el('bBreak').onclick=function(){if(brkLong){brkLong=false;return;}cmd('break',0);};
+el('bBreak').addEventListener('mousedown',brkDown);el('bBreak').addEventListener('mouseup',brkUp);el('bBreak').addEventListener('mouseleave',brkUp);
+el('bBreak').addEventListener('touchstart',brkDown);el('bBreak').addEventListener('touchend',brkUp);el('bBreak').addEventListener('touchcancel',brkUp);
+el('bSiren').onclick=function(){cmd('whistle',0);};
+el('bReset').onclick=function(){el('mReset').className='modal on';};
+el('mResetC').onclick=function(){el('mReset').className='modal';};
+el('mResetOk').onclick=null;
+el('hGp').onclick=function(){cmd('score_h_plus',0);};el('hGm').onclick=function(){cmd('score_h_minus',0);};
+el('aGp').onclick=function(){cmd('score_a_plus',0);};el('aGm').onclick=function(){cmd('score_a_minus',0);};
+el('hTp').onclick=function(){cmd('timeout_h',0);};el('hTm').onclick=function(){cmd('to_h_dec',0);};
+el('aTp').onclick=function(){cmd('timeout_a',0);};el('aTm').onclick=function(){cmd('to_a_dec',0);};
+/* ПУНКТ 10: шаблон «+1,5» = 90 секунд. Целые минуты уходят командой pen_add_*,
+   а 1,5 мин - pen_add_sec_* (секунды), см. submitPen(). */
+el('hP15').onclick=function(){openPen('h',1.5);};
+el('hP2').onclick=function(){openPen('h',2);};el('hP4').onclick=function(){openPen('h',4);};el('hP5').onclick=function(){openPen('h',5);};el('hPc').onclick=function(){openPen('h',null);};
+el('aP15').onclick=function(){openPen('a',1.5);};
+el('aP2').onclick=function(){openPen('a',2);};el('aP4').onclick=function(){openPen('a',4);};el('aP5').onclick=function(){openPen('a',5);};el('aPc').onclick=function(){openPen('a',null);};
+el('hRem').onclick=function(){remByTeam('h');};el('aRem').onclick=function(){remByTeam('a');};
+el('pPrev').onclick=function(){requestPeriod(-1);};el('pNext').onclick=function(){requestPeriod(1);};
+el('ssBtn').onclick=function(){if(MODE=='CLK'||MODE=='PRE'){cmd('splash_hide',0);return;}cmd(RUN?'stop':'start',0);};
+el('fixOk').onclick=submitFix;
+el('fixIn').onkeydown=enterAs('fixOk');
+el('mPenC').onclick=closePen;
+el('mPenOk').onclick=submitPen;
+el('mPenN').onkeydown=enterAs('mPenOk');
+el('mPenM').onkeydown=enterAs('mPenOk');
+el('mRemC').onclick=closeRem;
+el('mRemOk').onclick=submitRem;
+el('mRemN').onkeydown=enterAs('mRemOk');
+el('rc_h0').onclick=remCellClickP;el('rc_a0').onclick=remCellClickP;
+el('rc_h1').onclick=remCellClickP;el('rc_a1').onclick=remCellClickP;
+el('mRemTH').onclick=function(){remNumTeam='h';this.className='team on';el('mRemTA').className='team';};
+el('mRemTA').onclick=function(){remNumTeam='a';this.className='team on';el('mRemTH').className='team';};
+
+/* ===== 1.2: APK class, UI lock, modal X, hold-to-confirm, break/time reset, period confirm ===== */
+try{if(IS_APK&&document.body.className.indexOf('apk')<0)document.body.className+=' apk';}catch(e){}
+function hideModal(id){var m=el(id);if(!m)return;m.className=m.className.replace(/\s*\bon\b/g,'');}
+function stopBars(root){try{var bs=root.querySelectorAll('.warn,[data-hold]');for(var i=0;i<bs.length;i++){if(bs[i].__holdStop)bs[i].__holdStop();}}catch(e){}}
+function initModalX(){
+ var boxes=document.querySelectorAll('.modal .box');
+ for(var i=0;i<boxes.length;i++){(function(box){
+  if(!box||box.getAttribute('data-x'))return;box.setAttribute('data-x','1');
+  var b=document.createElement('button');b.type='button';b.className='modalX';b.innerHTML='&times;';b.setAttribute('aria-label','Закрыть');
+  b.onclick=function(){var p=box;while(p&&p.className.indexOf('modal')<0)p=p.parentNode;if(p){stopBars(p);p.className=p.className.replace(/\s*\bon\b/g,'');}};
+  box.appendChild(b);
+ })(boxes[i]);}
+}
+function bindHold(btn,onDone){
+ if(!btn)return;var timer=null,start=0;
+ function bar(){var p=btn.parentNode;while(p&&(!p.className||p.className.indexOf('box')<0))p=p.parentNode;return p?p.querySelector('.holdBar i'):null;}
+ function stop(){if(timer){clearInterval(timer);timer=null;}var b=bar();if(b)b.style.width='0%';}
+ function begin(ev){if(ev&&ev.preventDefault)ev.preventDefault();if(timer)return;start=Date.now();var b=bar();if(b)b.style.width='0%';
+  timer=setInterval(function(){
+   if(!btn.offsetParent){stop();return;}
+   var pct=Math.min(100,(Date.now()-start)/20);var q=bar();if(q)q.style.width=pct+'%';
+   if(pct>=100){stop();try{onDone();}catch(e){}};
+  },20);}
+ btn.__holdStop=stop;btn.onclick=function(e){if(e&&e.preventDefault)e.preventDefault();};
+ if(window.PointerEvent){btn.addEventListener('pointerdown',begin);document.addEventListener('pointerup',stop);document.addEventListener('pointercancel',stop);}
+ else{btn.addEventListener('mousedown',begin);btn.addEventListener('touchstart',begin);document.addEventListener('mouseup',stop);document.addEventListener('touchend',stop);}
+}
+function setLock(v){locked=!!v;try{document.body.className=(''+document.body.className).replace(/\s*\blocked\b/g,'')+(locked?' locked':'');}catch(e){}
+ var b=el('lockBtn');if(b)b.innerHTML=locked?'&#128274;':'&#128275;';}
+/* time reset */
+function openTimeReset(){el('mTimeReset').className='modal on';}
+/* break time edit: long press on ПЕРЕРЫВ */
+var brkLong=false,brkTimer=null;
+function brkDown(e){brkLong=false;if(brkTimer){clearTimeout(brkTimer);}brkTimer=setTimeout(function(){brkLong=true;openBreakEdit();},650);}
+function brkUp(){if(brkTimer){clearTimeout(brkTimer);brkTimer=null;}}
+function openBreakEdit(){brkLong=false;var i=el('brkVal');if(!i)return;i.readOnly=true;i.value=fmtP(breakSec);el('brkErr').textContent='';el('mBreak').className='modal on';}
+function brkActivate(){var i=el('brkVal');if(!i||!i.readOnly)return;i.readOnly=false;i.value='';try{i.focus();}catch(e){}}
+function closeBreak(){hideModal('mBreak');}
+function submitBreak(){var i=el('brkVal');if(!i||i.readOnly){el('brkErr').textContent='Нажмите на поле и введите время';return;}
+ var sec=parseSec(i.value);if(sec<0||sec<=0){el('brkErr').textContent='Формат: MM:SS или MMSS (больше 0)';return;}
+ closeBreak();cmd('break_set',sec);toast('Время перерыва сохранено: '+fmtP(sec),true);}
+/* period confirm */
+var periodDelta=1;
+function requestPeriod(d){periodDelta=d;if(!RUN||GOD){cmd(d>0?'period_next_force':'period_prev_force',0);return;}el('mPeriod').className='modal on';}
+function submitPeriod(){hideModal('mPeriod');cmd(periodDelta>0?'period_next_force':'period_prev_force',0);}
+/* quick buttons height = ЗАПОМНИТЬ */
+function syncQuickHeights(){var ref=el('bRefRemember');if(!ref)return;var h=ref.offsetHeight;if(h<20)return;
+ var bs=document.querySelectorAll('.row3 button');for(var i=0;i<bs.length;i++){bs[i].style.height=h+'px';}}
+window.addEventListener('resize',function(){syncQuickHeights();});
+window.onerror=function(){try{var ms=document.querySelectorAll('.modal.on');for(var i=0;i<ms.length;i++){ms[i].className='modal';}toast('Ошибка интерфейса — окно закрыто',false);}catch(e){}return false;};
+
+function fmtP(v){v=+v||0;if(v<0)v=0;return pad2(Math.floor(v/60))+':'+pad2(v%60);}
+function cmdText(k,v){if(!token)return;var x=new XMLHttpRequest();
+x.open('POST','/cmdtext?key='+k+'&v='+encodeURIComponent(v),true);setTok(x);   /* О-9: POST */
+x.onload=function(){if(x.status==403){relogin('Сессия завершена — войдите снова');}};
+x.send('');}
+el('rm').oninput=function(){refDirty=true;};
+el('ro').oninput=function(){refDirty=true;};
+el('bRefRemember').onclick=function(){refDirty=false;cmd('ref_remember',0);toast('Запоминание эталона запрошено',true);};
+el('bRefEdit').onclick=function(){var a=parseSec(el('rm').value),b=parseSec(el('ro').value);
+if(a<0||b<0){toast('Эталон: формат MM:SS или MMSS в обоих полях',false);return;}
+refDirty=false;cmdText('ref_edit',a+'|'+b);toast('Правка эталона отправлена',true);};
+initLoginUi();initModalX();
+setLock(false);
+el('lockBtn').onclick=function(){setLock(!locked);};
+el('bTimeReset').onclick=openTimeReset;
+el('mTimeResetC').onclick=function(){hideModal('mTimeReset');};
+bindHold(el('mTimeResetOk'),function(){hideModal('mTimeReset');cmd('time_reset_manual',0);toast('Время сброшено',true);});
+bindHold(el('mResetOk'),function(){hideModal('mReset');cmd('reset',0);toast('Полный сброс матча выполнен',true);});
+el('mPeriodC').onclick=function(){hideModal('mPeriod');};
+el('mPeriodOk').onclick=submitPeriod;
+el('brkVal').onclick=brkActivate;
+el('mBreakC').onclick=closeBreak;
+el('mBreakOk').onclick=submitBreak;
+setTimeout(syncQuickHeights,80);window.addEventListener('orientationchange',function(){setTimeout(syncQuickHeights,250);});
+(function(){var t='';try{t=localStorage.getItem('tablo_token')||'';}catch(e){}
+if(!t)return;token=t;
+var x=new XMLHttpRequest();x.open('GET','/sessioncheck',true);try{x.setRequestHeader('X-Tablo-Token',t);}catch(e){}
+x.onload=function(){if(x.status==200){start();}else{token='';try{localStorage.removeItem('tablo_token');}catch(e){}}};
+x.onerror=function(){start();};
+x.send();})();
+</script>
+</body>
+</html>

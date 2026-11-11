@@ -1,0 +1,5 @@
+// Корневой сборочный файл. Плагины объявлены здесь, применяются в :app.
+// Приложение — только framework-API (WebView), сторонних зависимостей нет.
+plugins {
+    id 'com.android.application' version '8.1.4' apply false
+}

@@ -1,0 +1,31 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'ru.tablo.operator'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "ru.tablo.operator"
+        minSdk 26          // Android 8.0 — требование заказчика
+        targetSdk 34       // как в исходном проекте
+        versionCode 4
+        versionName "1.2"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// Зависимостей нет: Activity/WebView/AlertDialog — framework-классы Android.
+dependencies {
+}
